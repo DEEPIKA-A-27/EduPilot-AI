@@ -8,6 +8,7 @@ import Career from './pages/Career';
 import Assistant from './pages/Assistant';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Profile from './pages/Profile';
 
 function AppContent() {
   const location = useLocation();
@@ -22,6 +23,7 @@ function AppContent() {
         <Route path="/planner" element={<StudyPlanner />} />
         <Route path="/career" element={<Career />} />
         <Route path="/assistant" element={<Assistant />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
       </Routes>

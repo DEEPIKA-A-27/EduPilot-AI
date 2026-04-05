@@ -132,3 +132,97 @@ exports.login = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.getProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    const user = await User.findByPk(userId, {
+      attributes: { exclude: ['password'] }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ user });
+  } catch (error) {
+    console.error('Get profile error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const {
+      firstName,
+      lastName,
+      username,
+      mobileNumber,
+      dateOfBirth,
+      gender,
+      city,
+      state,
+      country,
+      idProofType,
+      idProofNumber,
+      educationDetails,
+      resume,
+      profilePicture,
+      preferences
+    } = req.body;
+
+    // Check if new username already exists (if changing)
+    if (username) {
+      const existingUsername = await User.findOne({
+        where: {
+          username: username,
+          id: { [Op.ne]: userId }
+        }
+      });
+
+      if (existingUsername) {
+        return res.status(400).json({ error: 'Username already taken' });
+      }
+    }
+
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Update user fields
+    await user.update({
+      firstName,
+      lastName,
+      username,
+      mobileNumber,
+      dateOfBirth,
+      gender,
+      city,
+      state,
+      country,
+      idProofType,
+      idProofNumber,
+      educationDetails,
+      resume,
+      profilePicture,
+      preferences: preferences ? JSON.parse(preferences) : null
+    });
+
+    res.json({ 
+      message: 'Profile updated successfully',
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName
+      }
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};

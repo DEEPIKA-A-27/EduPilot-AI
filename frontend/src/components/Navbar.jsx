@@ -14,11 +14,12 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   const navItems = [
-    { path: '/', label: 'Dashboard', icon: '??' },
-    { path: '/notes', label: 'Notes', icon: '??' },
-    { path: '/planner', label: 'Planner', icon: '??' },
-    { path: '/career', label: 'Career', icon: '??' },
-    { path: '/assistant', label: 'AI Chat', icon: '??' },
+    { path: '/', label: 'Dashboard', icon: '🏠' },
+    { path: '/notes', label: 'Notes', icon: '📝' },
+    { path: '/planner', label: 'Planner', icon: '📅' },
+    { path: '/career', label: 'Career', icon: '💼' },
+    { path: '/assistant', label: 'AI Chat', icon: '🤖' },
+    { path: '/profile', label: 'Profile', icon: '👤' },
   ];
 
   return (
@@ -27,7 +28,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center">
           {/* Logo */}
           <Link to="/" className="text-2xl font-bold flex items-center gap-2">
-            <span className="text-3xl">??</span>
+            <span className="text-3xl">🎓</span>
             EduPilot AI
           </Link>
 
@@ -63,7 +64,7 @@ const Navbar = () => {
             className="md:hidden text-2xl"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
-            {isMobileMenuOpen ? '?' : '?'}
+            {isMobileMenuOpen ? '✕' : '☰'}
           </button>
         </div>
 
