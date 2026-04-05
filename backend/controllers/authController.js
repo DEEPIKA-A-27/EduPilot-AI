@@ -1,24 +1,134 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { Op } = require('sequelize');
 const User = require('../models/userModel');
 
 exports.register = async (req, res) => {
-  const { email, password, name } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
   try {
-    const user = await User.create({ email, password: hashedPassword, name });
-    res.status(201).json({ message: 'User created' });
+    const {
+      email,
+      username,
+      password,
+      confirmPassword,
+      firstName,
+      lastName,
+      mobileNumber,
+      dateOfBirth,
+      gender,
+      city,
+      state,
+      country,
+      idProofType,
+      idProofNumber,
+      educationDetails,
+      resume,
+      profilePicture,
+      preferences
+    } = req.body;
+
+    // Validation
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({ error: 'Passwords do not match' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({
+      where: {
+        email: email,
+      }
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ error: 'Email already registered' });
+    }
+
+    // Check if username already exists
+    if (username) {
+      const existingUsername = await User.findOne({
+        where: {
+          username: username,
+        }
+      });
+
+      if (existingUsername) {
+        return res.status(400).json({ error: 'Username already taken' });
+      }
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      email,
+      username,
+      password: hashedPassword,
+      firstName,
+      lastName,
+      mobileNumber,
+      dateOfBirth,
+      gender,
+      city,
+      state,
+      country,
+      idProofType,
+      idProofNumber,
+      educationDetails,
+      resume,
+      profilePicture,
+      preferences: preferences ? JSON.parse(preferences) : null
+    });
+
+    res.status(201).json({ 
+      message: 'User registered successfully',
+      userId: user.id 
+    });
   } catch (error) {
+    console.error('Registration error:', error);
     res.status(400).json({ error: error.message });
   }
 };
 
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ where: { email } });
-  if (!user || !await bcrypt.compare(password, user.password)) {
-    return res.status(401).json({ error: 'Invalid credentials' });
+  try {
+    const { emailOrUsername, password } = req.body;
+
+    if (!emailOrUsername || !password) {
+      return res.status(400).json({ error: 'Email/Username and password are required' });
+    }
+
+    // Allow login with either email or username
+    const user = await User.findOne({
+      where: {
+        [Op.or]: [
+          { email: emailOrUsername },
+          { username: emailOrUsername }
+        ]
+      }
+    });
+
+    if (!user || !await bcrypt.compare(password, user.password)) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
+    res.json({ 
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName
+      }
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: error.message });
   }
-  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
-  res.json({ token });
 };

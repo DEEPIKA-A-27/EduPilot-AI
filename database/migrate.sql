@@ -1,7 +1,17 @@
-CREATE DATABASE IF NOT EXISTS edupilot;
-USE edupilot;
+-- Disable foreign key checks temporarily
+SET FOREIGN_KEY_CHECKS = 0;
 
-CREATE TABLE IF NOT EXISTS users (
+-- Drop existing tables
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS notes;
+DROP TABLE IF EXISTS planners;
+DROP TABLE IF EXISTS careers;
+
+-- Re-enable foreign key checks
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- Create new users table with all fields
+CREATE TABLE users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   email VARCHAR(255) UNIQUE NOT NULL,
   username VARCHAR(100) UNIQUE,
@@ -23,6 +33,11 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Create indices
+CREATE INDEX idx_username ON users(username);
+CREATE INDEX idx_email ON users(email);
+
+-- Recreate notes table
 CREATE TABLE IF NOT EXISTS notes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT,
@@ -32,6 +47,7 @@ CREATE TABLE IF NOT EXISTS notes (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Recreate planners table
 CREATE TABLE IF NOT EXISTS planners (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT,
@@ -42,6 +58,7 @@ CREATE TABLE IF NOT EXISTS planners (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Recreate careers table
 CREATE TABLE IF NOT EXISTS careers (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT,
