@@ -7,6 +7,7 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -14,9 +15,14 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccess('');
     try {
       await axios.post('http://localhost:5000/api/auth/register', { email, password, name });
-      navigate('/login');
+      setSuccess('Registered successfully! Redirecting to login...');
+      setEmail('');
+      setPassword('');
+      setName('');
+      setTimeout(() => navigate('/login'), 2000);
     } catch (error) {
       setError(error.response?.data?.error || 'Registration failed');
     } finally {
@@ -35,6 +41,11 @@ const Register = () => {
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
             {error}
+          </div>
+        )}
+        {success && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
+            {success}
           </div>
         )}
         
